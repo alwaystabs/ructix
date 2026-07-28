@@ -8,12 +8,17 @@ CFLAGS  = -march=rv64g -mabi=lp64 -mcmodel=medany -nostdlib -ffreestanding -Wall
 LDFLAGS = -T linker.ld -no-pie
 
 OBJS = boot.o main.o
-TARGET = kernel.elf
 
-all: $(TARGET)
+TARGET_ELF = kernel.elf
+TARGET_BIN = kernel.bin
 
-$(TARGET): $(OBJS)
+all: $(TARGET_ELF) $(TARGET_BIN)
+
+$(TARGET_ELF): $(OBJS)
 	$(LD) $(LDFLAGS) $^ -o $@
+
+$(TARGET_BIN): $(TARGET_ELF)
+	$(OBJCOPY) -O binary $< $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
