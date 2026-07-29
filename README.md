@@ -1,6 +1,6 @@
 # 🚀 RUCTIX
 
-### Minimal RISC-V kernel made from scratch. Coded on Arch Linux by 14 y.o. coder.
+### Minimal RISC-V kernel from scratch. Coding on Arch Linux by 14 y.o. coder.
 ---
 ### ❓ What can it do?
   Ructix is in early development, but already includes:
