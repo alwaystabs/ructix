@@ -27,3 +27,11 @@ void itoa(unsigned long long val, char *buf) {
     buf[i] = '\0';
     reverse(buf, i);
 }
+int strlen(const char *str) {
+    int len = 0;
+    while (*str != '\0') {
+        len++;
+        str++;
+    }
+    return len;
+}
