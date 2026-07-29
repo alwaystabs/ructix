@@ -13,3 +13,23 @@
 ### Fixed
 - UART output reliability by adding a small delay between characters.
 - `panic()` now correctly displays the provided error message from C.
+
+## [v0.0.5] - 2026-07-30 - Refactoring and else
+
+### Changed
+- **Kernel code split into modules**:
+  - UART functions moved to `kernel/uart.c`
+  - Panic moved to `kernel/panic.c`
+  - String/itoa helpers moved to `kernel/string.c`
+  - Headers placed in `kernel/include/`
+- **Makefile restructured**:
+  - Separate build directories: `build/` for ELF/BIN, `temp/` for object files
+  - Added `make release` target for creating archives
+  - Improved rules for module compilation
+
+### Fixed
+- Removed obsolete root files (`boot.S`, `main.c`) after module split
+
+### Added
+- `strlen()` function for string length calculation
+- `CHANGELOG.md` file for tracking project history
