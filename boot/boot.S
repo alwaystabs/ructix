@@ -1,6 +1,6 @@
 .section .rodata
 panic_msg:
-    .asciz "\nPANIC!\n"
+    .asciz "[   !!!   ]\nPANIC!\n"
 .section .text.init
 .globl _start
 .extern tick_count

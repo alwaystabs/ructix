@@ -1,5 +1,7 @@
-void reverse(char *buf, int len) {
+#include "include/string.h"
+void reverse(char *buf) {
     int i = 0;
+    int len = strlen(buf);
     int j = len - 1;
     char tmp;
     while (i < j) {
@@ -25,7 +27,7 @@ void itoa(unsigned long long val, char *buf) {
         i++;
     }
     buf[i] = '\0';
-    reverse(buf, i);
+    reverse(buf);
 }
 int strlen(const char *str) {
     int len = 0;

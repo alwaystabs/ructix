@@ -7,7 +7,7 @@ QEMU    = qemu-system-riscv64
 CFLAGS  = -march=rv64g -mabi=lp64 -mcmodel=medany -nostdlib -ffreestanding -Wall -Wextra
 LDFLAGS = -T linker.ld -no-pie
 
-OBJS = $(TEMP_DIR)/boot.o $(TEMP_DIR)/main.o $(TEMP_DIR)/uart.o $(TEMP_DIR)/string.o
+OBJS = $(TEMP_DIR)/boot.o $(TEMP_DIR)/main.o $(TEMP_DIR)/uart.o $(TEMP_DIR)/string.o $(TEMP_DIR)/memory.o
 
 BUILD_DIR = build
 TEMP_DIR = temp
@@ -38,7 +38,11 @@ $(TEMP_DIR)/main.o: kernel/main.c | $(TEMP_DIR)
 
 $(TEMP_DIR)/uart.o: kernel/uart.c | $(TEMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
+
 $(TEMP_DIR)/string.o: kernel/string.c | $(TEMP_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TEMP_DIR)/memory.o: kernel/allocator.c | $(TEMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run: $(TARGET_ELF)
