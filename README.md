@@ -36,4 +36,6 @@
 ### ❗ *Wanna contribute or report a bug?*
 ### Feel free to open an [**Issue**](https://github.com/alwaystabs/ructix/issues) or a [**Pull Request**](https://github.com/alwaystabs/ructix/pulls)!
 ---
+## 🙏 Special thanks
+To the one who had no hands, but had a path — for helping very much build this project from zero to running kernel.
 # ❤️ **Building with curiosity, C, and RISC-V.** 
