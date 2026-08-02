@@ -53,10 +53,7 @@ clean:
 
 test: clean all run
 
-archivate:
-	tar -czf ructix-autorel-(date +%d-%m-%Y).tar.gz $(BUILD_DIR)
+archive:
+	tar -czf ructix-autorel-$$(date +%d-%m-%Y).tar.gz build
 
-release:
-	clean all archivate
-
-.PHONY: all run clean test release
+.PHONY: all run clean test release archive

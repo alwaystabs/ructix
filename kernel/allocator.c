@@ -12,7 +12,7 @@ void *kmalloc(size_t size) {
     char buf[32];
     void *ptr = heap_ptr;
     if (heap_ptr + aligned_size > _heap_end) {
-        panic("[    PANIC!!!    ]      Out of Memory\n");
+        panic("Out of Memory\n");
     }
     heap_ptr += aligned_size;
     return ptr;

@@ -2,6 +2,6 @@
 #define UART_H
 
 void uart_putchar(char c);
-void uart_puts(const char *str);
+void print(const char *str);
 
 #endif

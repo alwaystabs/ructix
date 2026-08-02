@@ -1,6 +1,6 @@
 .section .rodata
 panic_msg:
-    .asciz "[   !!!   ]\nPANIC!\n"
+    .asciz "[   PANIC!!!   ] "
 .section .text.init
 .globl _start
 .extern tick_count
@@ -101,8 +101,25 @@ panic:
     csrw mie, zero
     csrci mstatus, 0x8
     li t1, 0x10000000
-    j panic_loop
+    
+    mv s0, a0
+    la a0, panic_msg
+    
 panic_loop:
+    lb t0, 0(a0)
+    beqz t0, print_arg
+    sb t0, 0(t1)
+    li t2, 1000
+1:
+    addi t2, t2, -1
+    bnez t2, 1b
+    addi a0, a0, 1
+    j panic_loop
+
+print_arg:
+    mv a0, s0
+    
+panic_loop2:
     lb t0, 0(a0)
     beqz t0, halt
     sb t0, 0(t1)
@@ -111,7 +128,8 @@ panic_loop:
     addi t2, t2, -1
     bnez t2, 1b
     addi a0, a0, 1
-    j panic_loop
+    j panic_loop2
+
 halt:
     wfi
     j halt

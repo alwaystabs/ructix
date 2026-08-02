@@ -53,3 +53,16 @@
 
 ### Fixed
 - Many minor compilation fixes
+
+## [v0.0.65] - 2026-08-02 - Improvement Patch
+
+### Changed
+- **uart_puts() is now print()**
+- Panic message was changed a little: `[   PANIC!!!   ]` instead of `[   !!!   ]\nPANIC!\n`
+
+### Fixed
+- `panic()` now correctly shows warning message and panic reason
+- `make archive` command was fixed
+
+### Deleted
+- `make release` - for further improvements

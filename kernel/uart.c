@@ -5,6 +5,6 @@ void uart_putchar(char c) {
     *uart = c;
 }
 
-void uart_puts(const char *str) {
+void print(const char *str) {
     while (*str) uart_putchar(*str++);
 }
