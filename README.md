@@ -3,12 +3,16 @@
 ### Minimal RISC-V kernel from scratch. Coding on Arch Linux by 14 y.o. coder.
 ---
 ### ❓ What can it do?
-  Ructix is in early development, but already includes:
 
-- **UART output** — kernel messages via `uart_puts`
--  **Timer interrupts** — periodic ticks based on `MTIME` / `MTIMECMP`
--  **panic()** — safe kernel halt
-- **Basic heap region** — allocated via linker script (no allocator yet, but planned)
+Ructix is in early development, but already includes:
+
+- **UART output** — kernel messages via `print`
+- **Timer interrupts** — periodic ticks based on `MTIME` / `MTIMECMP`
+- **panic()** — safe kernel halt
+- **Bump memory allocator** (`kmalloc`) with 8-byte alignment and OOM panic
+- **Structured boot log** with header and test suite
+- **Explicit memory permissions** in linker script (R-X, R--, RW-)
+- **64-bit integer to string conversion** (`itoa`), `strlen`, and `reverse`
 ---
 ### 🛠️ Project requires some RISC-V tools:
   - ###### Required:
