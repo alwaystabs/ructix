@@ -3,12 +3,16 @@
 ### Minimal RISC-V kernel from scratch. Coding on Arch Linux by 14 y.o. coder.
 ---
 ### ❓ What can it do?
-  Ructix is in early development, but already includes:
 
-- **UART output** — kernel messages via `uart_puts`
--  **Timer interrupts** — periodic ticks based on `MTIME` / `MTIMECMP`
--  **panic()** — safe kernel halt
-- **Basic heap region** — allocated via linker script (no allocator yet, but planned)
+Ructix is in early development, but already includes:
+
+- **UART output** — kernel messages via `print`
+- **Timer interrupts** — periodic ticks based on `MTIME` / `MTIMECMP`
+- **panic()** — safe kernel halt
+- **Bump memory allocator** (`kmalloc`) with 8-byte alignment and OOM panic
+- **Structured boot log** with header and test suite
+- **Explicit memory permissions** in linker script (R-X, R--, RW-)
+- **64-bit integer to string conversion** (`itoa`), `strlen`, and `reverse`
 ---
 ### 🛠️ Project requires some RISC-V tools:
   - ###### Required:
@@ -26,7 +30,8 @@
   - **`make`** will compile .elf and create a binary copy of it.
   - **`make elf`** will only compile .elf file.
   - **`make run`** emulates compiled .elf file with QEMU.
-  - **`make rebuild`** does everything: `make clean`, `make`, `make run`.
+  - **`make test`** does everything: `make clean`, `make`, `make run`.
+  - **`make archivate`** makes an archive with .bin and .elf images of your latest compilation. Be careful, won't work if you don't have any files in /build!
 ---
 ---
 ### ✔️ *You can always download the latest stable version in releases:*
@@ -35,4 +40,6 @@
 ### ❗ *Wanna contribute or report a bug?*
 ### Feel free to open an [**Issue**](https://github.com/alwaystabs/ructix/issues) or a [**Pull Request**](https://github.com/alwaystabs/ructix/pulls)!
 ---
+## 🙏 Special thanks
+To the one who had no hands, but had a path — for helping very much build this project from zero to running kernel.
 # ❤️ **Building with curiosity, C, and RISC-V.** 
