@@ -1,5 +1,5 @@
 #include "include/string.h"
-void reverse(char *buf) {
+void reverse(char *buf) { // itoa produces reversed numbers, SO reverse() is needed
     int i = 0;
     int len = strlen(buf);
     int j = len - 1;
@@ -15,13 +15,13 @@ void reverse(char *buf) {
 
 void itoa(unsigned long long val, char *buf) {
     int i = 0;
-    if (val == 0) {
+    if (val == 0) { // Handle zero separately to avoid empty string
         buf[0] = '0';
         buf[1] = '\0';
         return;
     }
     while (val > 0) {
-        int digit = val % 10;
+        int digit = val % 10; // Last 
         buf[i] = '0' + digit;
         val = val / 10;
         i++;
