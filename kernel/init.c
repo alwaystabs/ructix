@@ -4,12 +4,15 @@
 #define TICKS_PER_SEC 60
 #define TIMER_INTERVAL (TIMER_FREQ / TICKS_PER_SEC)
 #include "include/uart.h"
-#include "include/string.h"
+#include "include/kstring.h"
 #include "include/memory.h"
+#include "include/shell.h"
 
 volatile unsigned long long tick_count = 0;
 extern void panic(const char *msg); // in boot.S
 char buf[32]; // Global buffer now
+char cmd_buf[64];
+int cmd_index = 0;
 
 void init_check(void) {
         print("---------------\n");
@@ -65,25 +68,7 @@ void kmain() {
     print("╔════════════════════════════════════╗\n");
     print("║          RUCTIX BOOT LOG           ║\n");
     print("╚════════════════════════════════════╝\n");
-    print("Ructix v0.0.7 is up. It's good.\n");
+    print("Ructix v0.0.8 is up. It's good.\n");
     init_check();
-    print("Echo loop started, type something and you'll get echo of it\n");
-    while (1) {
-        __asm__ volatile("wfi");
-        char c = uart_getchar();
-        if (c != '\0') {
-            if (c == '\r') { // '\r' = Enter key
-                uart_putchar('\r');
-                uart_putchar('\n');
-            }
-            else if (c == '\b' || c == 0x7f) { // '\b' and 0x7f = Backspace key
-                uart_putchar('\b');
-                uart_putchar(' ');
-                uart_putchar('\b');
-            }
-            else {
-                uart_putchar(c);
-            }
-        }
-    }
+    shell_loop();
 }

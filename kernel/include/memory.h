@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 #include "uart.h"
-#include "string.h"
+#include "kstring.h"
 #include "panic.h"
 
 void kmalloc_init(void);

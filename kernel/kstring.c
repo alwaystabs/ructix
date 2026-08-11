@@ -1,4 +1,4 @@
-#include "include/string.h"
+#include "include/kstring.h"
 void reverse(char *buf) { // itoa produces reversed numbers, SO reverse() is needed
     int i = 0;
     int len = strlen(buf);
@@ -36,4 +36,12 @@ int strlen(const char *str) {
         str++;
     }
     return len;
+}
+
+int strcmp(const char *str1, const char *str2) {
+    while (*str1 && *str2 && *str1 == *str2) {
+        str1++;
+        str2++;
+    }
+    return *str1 - *str2;
 }

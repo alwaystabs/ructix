@@ -1,4 +1,3 @@
-
 CC      = riscv64-elf-gcc
 LD      = riscv64-elf-ld
 OBJCOPY = riscv64-elf-objcopy
@@ -7,15 +6,15 @@ QEMU    = qemu-system-riscv64
 CFLAGS  = -march=rv64g -mabi=lp64 -mcmodel=medany -nostdlib -ffreestanding -Wall -Wextra
 LDFLAGS = -T linker.ld -no-pie
 
-OBJS = $(TEMP_DIR)/boot.o $(TEMP_DIR)/init.o $(TEMP_DIR)/uart.o $(TEMP_DIR)/string.o $(TEMP_DIR)/memory.o
+OBJS = $(TEMP_DIR)/boot.o $(TEMP_DIR)/init.o $(TEMP_DIR)/uart.o $(TEMP_DIR)/kstring.o $(TEMP_DIR)/memory.o $(TEMP_DIR)/shell.o
 
 BUILD_DIR = build
 TEMP_DIR = temp
 KERNEL_DIR = kernel
 
 TARGET = $(TARGET_ELF)
-TARGET_ELF = $(BUILD_DIR)/kernel.elf
-TARGET_BIN = $(BUILD_DIR)/kernel.bin
+TARGET_ELF = $(BUILD_DIR)/ructix.elf
+TARGET_BIN = $(BUILD_DIR)/ructix.bin
 
 
 all: $(TARGET_ELF) $(TARGET_BIN)
@@ -39,10 +38,13 @@ $(TEMP_DIR)/init.o: kernel/init.c | $(TEMP_DIR)
 $(TEMP_DIR)/uart.o: kernel/uart.c | $(TEMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TEMP_DIR)/string.o: kernel/string.c | $(TEMP_DIR)
+$(TEMP_DIR)/kstring.o: kernel/kstring.c | $(TEMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TEMP_DIR)/memory.o: kernel/allocator.c | $(TEMP_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TEMP_DIR)/shell.o: kernel/shell.c | $(TEMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run: $(TARGET_ELF)
