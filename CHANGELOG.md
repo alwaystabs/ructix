@@ -66,3 +66,20 @@
 
 ### Deleted
 - `make release` - for further improvements
+
+## [v0.0.7] - 2026-08-07 - Major Update: UART Input & Minor Improvements
+
+### Added
+- **[!] UART Input: `uart_getchar()` implemented with polling and LSR (Line Status Register) check**
+- **Control character handling** — Enter (`\r`) now starts a new line (`\r\n`), Backspace (`\b`) erases the previous character
+- **kmalloc debug logging** — allocation calls now print the requested size and the actual aligned size allocated (useful for understanding memory alignment)
+- **Global buffer `buf`** — declared `char buf[32]` as a global variable in `init.c` (was previously stack-local in `kmain`)
+- **Code documentation** — added detailed comments to many code sections, especially for interrupt setup
+
+### Changed
+- **Refactored kernel initialization** — moved boot-time tests (tick test, memory allocation test) from `kmain()` into a dedicated function `init_check()` for better code organization
+- **File renamed** — `main.c` → `init.c` (the content of `kmain` was split; the new file contains both `init_check()` and `kmain()`)
+- **`uart_putchar` parameter** — changed to `const char` for better const-correctness
+
+### Fixed
+- **`kfree()` and `free()` conflict** — resolved duplicate definition in `memory.h`

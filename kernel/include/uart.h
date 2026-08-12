@@ -3,5 +3,6 @@
 
 void uart_putchar(char c);
 void print(const char *str);
+char uart_getchar(void);
 
 #endif
