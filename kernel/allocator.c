@@ -1,5 +1,6 @@
 #include "include/memory.h"
 #include <stdint.h>
+#include "include/panic.h"
 
 extern char _heap_start[];
 extern char _heap_end[];

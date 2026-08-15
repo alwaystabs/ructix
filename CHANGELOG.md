@@ -13,6 +13,9 @@
 ### Fixed
 - UART output reliability by adding a small delay between characters.
 - `panic()` now correctly displays the provided error message from C.
+
+### The story has begun.
+
 ---
 ## [v0.0.5] - 2026-07-30 - Refactoring and else
 
@@ -53,7 +56,7 @@
 
 ### Fixed
 - Many minor compilation fixes
-
+---
 ## [v0.0.65] - 2026-08-02 - Improvement Patch
 
 ### Changed
@@ -66,7 +69,7 @@
 
 ### Deleted
 - `make release` - for further improvements
-
+---
 ## [v0.0.7] - 2026-08-07 - Major Update: UART Input & Minor Improvements
 
 ### Added
@@ -83,3 +86,47 @@
 
 ### Fixed
 - **`kfree()` and `free()` conflict** — resolved duplicate definition in `memory.h`
+---
+## [v0.1.0] - 2026-08-12 - The Shell Rises - Grand Update
+
+### Added
+- **[!] Command shell:** Interactive shell with command prompt (`ructix>`).
+- **[!] Command parser:** Table-driven command dispatch using `command_t` struct.
+- **Built-in commands:**
+  - `help` — displays available commands.
+  - `status` — shows system status (tick count).
+  - `panic` — triggers a kernel panic.
+- **Modular structure:** Shell logic separated into `shell.c` with its own header.
+- **Static buffers:** Command buffer (`cmd_buf`) is now static to prevent conflicts.
+
+### Changed
+- **Boot flow:** Replaced the passive tick loop in `kmain` with an interactive command loop (`cmd_loop()`).
+- **File organization:** `main.c` renamed to `init.c`; custom `string.h` renamed to `kstring.h` to avoid conflicts with system headers.
+
+### Fixed
+- **Command handling:** Fixed buffer overflow protection and backspace handling.
+- **Build system:** Added `shell.o` and `panic.o` to Makefile.
+
+## [v0.1.5] - 2026-08-14 - Improvement Patch
+
+### Added
+- **ANSI color support:** Boot log now shows version in green, build info in gray.
+- **Prompt protection:** `print_prompt()` function with `\033[K` (clear line) to prevent accidental erasure.
+- **Something lives here from now on.**
+
+### Changed
+- **Assembly refactor:** Moved `boot.S` to `asm/` and split into `init.S`, `panic.S`, `trap_handler.S`.
+- **Build system:** Updated Makefile to compile new assembly files (`panic.o`, `trap_handler.o`).
+- **Shell:**
+  - `shell_loop()` now uses `print_prompt()`.
+  - Unknown command output now shows the exact command: `Unknown command 'xyz'`.
+  - Fixed backspace indentation and prompt restoration.
+- **Memory:** Added `#include <stdint.h>` and `panic.h` to `allocator.c`.
+
+### Fixed
+- **Prompt erasure:** Backspace can no longer delete the `ructix>` prompt.
+- **Makefile paths:** Fixed assembly file dependencies.
+- **Boot message:** Updated version string to `v0.1.0`.
+
+### Removed
+- **Old `boot.S`:** Deleted monolithic file (split into three logical files).

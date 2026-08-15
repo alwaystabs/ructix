@@ -1,22 +1,4 @@
-.section .rodata
-panic_msg:
-    .asciz "[   PANIC!!!   ] "
-.section .text.init
-.globl _start
 .extern tick_count
-.extern kmain
-_start:
-    la sp, _stack_top
-    la t0, trap_handler
-    csrw mtvec, t0
-    li t0, 0x80
-    csrw mie, t0
-    csrsi mstatus, 0x8
-    call kmain
-loop:
-    wfi
-    j loop
-.align 4
 .globl trap_handler
 trap_handler:
     addi sp, sp, -256
@@ -96,40 +78,3 @@ trap_handler:
     ld t6, 216(sp)
     addi sp, sp, 256
     mret
-.globl panic
-panic:
-    csrw mie, zero
-    csrci mstatus, 0x8
-    li t1, 0x10000000
-    
-    mv s0, a0
-    la a0, panic_msg
-    
-panic_loop:
-    lb t0, 0(a0)
-    beqz t0, print_arg
-    sb t0, 0(t1)
-    li t2, 1000
-1:
-    addi t2, t2, -1
-    bnez t2, 1b
-    addi a0, a0, 1
-    j panic_loop
-
-print_arg:
-    mv a0, s0
-    
-panic_loop2:
-    lb t0, 0(a0)
-    beqz t0, halt
-    sb t0, 0(t1)
-    li t2, 1000
-1:
-    addi t2, t2, -1
-    bnez t2, 1b
-    addi a0, a0, 1
-    j panic_loop2
-
-halt:
-    wfi
-    j halt

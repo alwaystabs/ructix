@@ -1,18 +1,31 @@
 #include "include/shell.h"
+
 #include "include/uart.h"
 #include "include/panic.h"
 #include "include/kstring.h"
+#include "secret/rux.h"
 
 extern volatile unsigned long long tick_count;
 int strcmp(const char *str1, const char *str2);
+char cmd_buf[256];
+int cmd_index = 0;
+static int prompt_len = 0;
 
 void cmd_help(void);
 void cmd_status(void);
 void cmd_panic(void);
 
+char print_prompt(void) {
+    const char *prompt = "ructix> ";
+    int len = strlen(prompt);
+    print("\033[K");
+    print(prompt);
+    return len;
+}
+
 void shell_loop(void) {
     print("Ructix shell is UP. \n");
-    print("ructix> ");
+    prompt_len = print_prompt();
     while (1) {
         __asm__ volatile("wfi");
         char c = uart_getchar();
@@ -23,16 +36,17 @@ void shell_loop(void) {
                 cmd_buf[cmd_index] = '\0';
                 shell_execute(cmd_buf);
                 cmd_index = 0;
+                print_prompt();
             }
             else if (c == '\b' || c == 0x7f) { // '\b' and 0x7f = Backspace key
                 if (cmd_index > 0) {
-                cmd_index--;
-                uart_putchar('\b');
-                uart_putchar(' ');
-                uart_putchar('\b');
-        }
+                    cmd_index--;
+                    uart_putchar('\b');
+                    uart_putchar(' ');
+                    uart_putchar('\b');
+                }
             }
-        else if (cmd_index < 63) {
+        else if (cmd_index <= 255) {
             cmd_buf[cmd_index] = c;
             cmd_index++;
             uart_putchar(c);
@@ -52,19 +66,26 @@ static const command_t commands[] = {
 
 void shell_execute(char *cmd) {
     if (*cmd == '\0') {
+        if ((tick_count % 100) < 3) {
+            rux_nothing_to_execute();
+        }
+        return;
+    }
+    if (strlen(cmd) >= 255) {
+        print("Command too long (max 255 chars)\n");
         return;
     }
 
     for (int i = 0; i < (int)(sizeof(commands) / sizeof(commands[0])); i++) {
         if (strcmp(cmd, commands[i].name) == 0) {
             commands[i].func();
-            print("ructix> ");
             return;
         }
     }
-
-    print("ructix: Unknown command\n");
-    print("ructix> ");
+    print("ructix: Unknown command ");
+    print("'");
+    print((const char *)(cmd));
+    print("'\n");
 }
 
 void cmd_help(void) {
@@ -74,7 +95,7 @@ void cmd_help(void) {
 }
 
 void cmd_status(void) {
-    char buf[32];
+    static char buf[32];
     print("Ticks: ");
     itoa(tick_count, buf);
     print(buf);

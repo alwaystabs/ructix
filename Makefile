@@ -6,7 +6,7 @@ QEMU    = qemu-system-riscv64
 CFLAGS  = -march=rv64g -mabi=lp64 -mcmodel=medany -nostdlib -ffreestanding -Wall -Wextra
 LDFLAGS = -T linker.ld -no-pie
 
-OBJS = $(TEMP_DIR)/boot.o $(TEMP_DIR)/init.o $(TEMP_DIR)/uart.o $(TEMP_DIR)/kstring.o $(TEMP_DIR)/memory.o $(TEMP_DIR)/shell.o
+OBJS = $(TEMP_DIR)/boot.o $(TEMP_DIR)/init.o $(TEMP_DIR)/uart.o $(TEMP_DIR)/kstring.o $(TEMP_DIR)/memory.o $(TEMP_DIR)/shell.o $(TEMP_DIR)/panic.o $(TEMP_DIR)/trap_handler.o $(TEMP_DIR)/rux.o
 
 BUILD_DIR = build
 TEMP_DIR = temp
@@ -29,7 +29,13 @@ $(TARGET_ELF): $(OBJS) | $(BUILD_DIR)
 $(TARGET_BIN): $(TARGET_ELF)
 	$(OBJCOPY) -O binary $< $@
 
-$(TEMP_DIR)/boot.o: boot/boot.S | $(TEMP_DIR)
+$(TEMP_DIR)/boot.o: asm/init.S | $(TEMP_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TEMP_DIR)/panic.o: asm/panic.S | $(TEMP_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TEMP_DIR)/trap_handler.o: asm/trap_handler.S | $(TEMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TEMP_DIR)/init.o: kernel/init.c | $(TEMP_DIR)
@@ -45,6 +51,9 @@ $(TEMP_DIR)/memory.o: kernel/allocator.c | $(TEMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TEMP_DIR)/shell.o: kernel/shell.c | $(TEMP_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TEMP_DIR)/rux.o: kernel/secret/rux.c | $(TEMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run: $(TARGET_ELF)

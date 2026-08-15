@@ -11,8 +11,8 @@
 volatile unsigned long long tick_count = 0;
 extern void panic(const char *msg); // in boot.S
 char buf[32]; // Global buffer now
-char cmd_buf[64];
-int cmd_index = 0;
+extern char cmd_buf[256];
+extern int cmd_index;
 
 void init_check(void) {
         print("---------------\n");
@@ -64,11 +64,11 @@ void kmain() {
     __asm__ volatile("ld %0, 0(%1)" : "=r"(now) : "r"(MTIME));
     unsigned long long next = now + TIMER_INTERVAL; // next tick (now + interval)
     __asm__ volatile("sd %0, 0(%1)" : : "r"(next), "r"(MTIMECMP));
-
     print("╔════════════════════════════════════╗\n");
     print("║          RUCTIX BOOT LOG           ║\n");
     print("╚════════════════════════════════════╝\n");
-    print("Ructix v0.0.8 is up. It's good.\n");
+    print("\033[90mbuilt by alwaystabs in 2026.\033[0m\n");
+    print("\033[32mRuctix v0.1.5 can't wait to get started.\033[0m\n");
     init_check();
     shell_loop();
 }
