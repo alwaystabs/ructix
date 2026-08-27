@@ -57,23 +57,14 @@ int strcmp(const char *str1, const char *str2) {
 }
 
 void print_hex(uint64_t val) {
-  char buf[19];
-  buf[0] = '0';
-  buf[1] = 'x';
-  int idx = 2;
-  for (int i = 15; i >= 0; i--) {
-    uint8_t nibble = (val >> (i * 4)) & 0xF;
-    if (nibble < 10) {
-      buf[idx] = '0' + nibble;
-    } else {
-      buf[idx] = 'a' + (nibble - 10);
+    uart_putchar('0');
+    uart_putchar('x');
+    for (int i = 15; i >= 0; i--) {
+        uint8_t nibble = (val >> (i * 4)) & 0xF;
+        char c = (nibble < 10) ? ('0' + nibble) : ('a' + nibble - 10);
+        uart_putchar(c);
     }
-    idx++;
-  }
-  buf[18] = '\0';
-  print(buf);
 }
-
 int strncmp(const char *s1, const char *s2, size_t n) {
   while (n > 0 && *s1 && (*s1 == *s2)) {
     s1++;

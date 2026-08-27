@@ -134,7 +134,7 @@
 ## [v0.2.0] - 2026-08-27 - Major Security & Optimization Update
 
 ### Added
-- **Emergency stack** — 1 KB dedicated stack in BSS for fatal trap handling, prevents double faults.
+- **[!] Emergency stack** — 1 KB dedicated stack in BSS for fatal trap handling, prevents double faults.
 - **`fatal_trap_panic`** — assembly wrapper that routes severe exceptions onto the emergency stack and calls C handler.
 - **`unhandled_trap_c`** — C handler for fatal traps with register decoding and panic.
 - **`print_hex(uint64_t val)`** — print 64-bit values in hexadecimal format (great for debugging).
@@ -147,7 +147,7 @@
 - **Automatic source discovery** — Makefile now collects all `.c` and `.S` files recursively.
 
 ### Changed
-- **Linker script restructured:** stacks and heap now inside `.bss` with explicit 16‑byte alignment.
+- **[!] Linker script restructured:** stacks and heap now inside `.bss` with explicit 16‑byte alignment.
 - **`mtvec` now set in C** via `csrw mtvec, %0` instead of assembly startup.
 - **Trap handler split:** timer interrupts handled normally, fatal traps jump to emergency stack.
 - **`volatile` qualifiers** added to shell state buffers to prevent compiler optimizations during UART interrupts.
