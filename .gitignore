@@ -1,3 +1,5 @@
 /build
 /temp
 *.log
+*.tar.gz
+*.txt
