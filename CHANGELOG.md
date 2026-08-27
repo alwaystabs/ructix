@@ -130,3 +130,32 @@
 
 ### Removed
 - **Old `boot.S`:** Deleted monolithic file (split into three logical files).
+
+## [v0.2.0] - 2026-08-27 - Major Security & Optimization Update
+
+### Added
+- **Emergency stack** — 1 KB dedicated stack in BSS for fatal trap handling, prevents double faults.
+- **`fatal_trap_panic`** — assembly wrapper that routes severe exceptions onto the emergency stack and calls C handler.
+- **`unhandled_trap_c`** — C handler for fatal traps with register decoding and panic.
+- **`print_hex(uint64_t val)`** — print 64-bit values in hexadecimal format (great for debugging).
+- **Safe string functions** — `strnlen()` and `strncmp()` with length limits.
+- **DEBUG build mode** — optional `make DEBUG=1` with fault injection commands (`panic 1`, `panic 2`, `panic 3`).
+- **Debug triggers**:
+  - `panic 1` — illegal instruction (`unimp`)
+  - `panic 2` — load access fault (read from `0x0`)
+  - `panic 3` — stack overflow (recursive function)
+- **Automatic source discovery** — Makefile now collects all `.c` and `.S` files recursively.
+
+### Changed
+- **Linker script restructured:** stacks and heap now inside `.bss` with explicit 16‑byte alignment.
+- **`mtvec` now set in C** via `csrw mtvec, %0` instead of assembly startup.
+- **Trap handler split:** timer interrupts handled normally, fatal traps jump to emergency stack.
+- **`volatile` qualifiers** added to shell state buffers to prevent compiler optimizations during UART interrupts.
+- **Makefile updated** — interactive prompt for DEBUG mode, cleaner pattern rules.
+
+### Fixed
+- **`strlen` prototype mismatch** — now returns `size_t`.
+- **Off-by-one bug** in shell command length check (`cmd_index < 255`, not `<=`).
+- **Global buffer conflicts** — `kernel_buf` and `alloc_buf` separated.
+- **Invalid pointer dereference** in shell (`*cmd` → `*str_cmd` with proper casting).
+- **UART output reliability** — added `uart_puts` for raw string output.
