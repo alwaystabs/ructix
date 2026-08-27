@@ -1,10 +1,10 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <stddef.h>
-#include "uart.h"
-#include "string.h"
+#include "kstring.h"
 #include "panic.h"
+#include "uart.h"
+#include <stddef.h>
 
 void kmalloc_init(void);
 void *kmalloc(size_t size);

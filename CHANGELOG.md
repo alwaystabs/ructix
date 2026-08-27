@@ -13,6 +13,9 @@
 ### Fixed
 - UART output reliability by adding a small delay between characters.
 - `panic()` now correctly displays the provided error message from C.
+
+### The story has begun.
+
 ---
 ## [v0.0.5] - 2026-07-30 - Refactoring and else
 
@@ -53,7 +56,7 @@
 
 ### Fixed
 - Many minor compilation fixes
-
+---
 ## [v0.0.65] - 2026-08-02 - Improvement Patch
 
 ### Changed
@@ -66,7 +69,7 @@
 
 ### Deleted
 - `make release` - for further improvements
-
+---
 ## [v0.0.7] - 2026-08-07 - Major Update: UART Input & Minor Improvements
 
 ### Added
@@ -83,3 +86,76 @@
 
 ### Fixed
 - **`kfree()` and `free()` conflict** — resolved duplicate definition in `memory.h`
+---
+## [v0.1.0] - 2026-08-12 - The Shell Rises - Grand Update
+
+### Added
+- **[!] Command shell:** Interactive shell with command prompt (`ructix>`).
+- **[!] Command parser:** Table-driven command dispatch using `command_t` struct.
+- **Built-in commands:**
+  - `help` — displays available commands.
+  - `status` — shows system status (tick count).
+  - `panic` — triggers a kernel panic.
+- **Modular structure:** Shell logic separated into `shell.c` with its own header.
+- **Static buffers:** Command buffer (`cmd_buf`) is now static to prevent conflicts.
+
+### Changed
+- **Boot flow:** Replaced the passive tick loop in `kmain` with an interactive command loop (`cmd_loop()`).
+- **File organization:** `main.c` renamed to `init.c`; custom `string.h` renamed to `kstring.h` to avoid conflicts with system headers.
+
+### Fixed
+- **Command handling:** Fixed buffer overflow protection and backspace handling.
+- **Build system:** Added `shell.o` and `panic.o` to Makefile.
+
+## [v0.1.5] - 2026-08-14 - Improvement Patch
+
+### Added
+- **ANSI color support:** Boot log now shows version in green, build info in gray.
+- **Prompt protection:** `print_prompt()` function with `\033[K` (clear line) to prevent accidental erasure.
+- **Something lives here from now on.**
+
+### Changed
+- **Assembly refactor:** Moved `boot.S` to `asm/` and split into `init.S`, `panic.S`, `trap_handler.S`.
+- **Build system:** Updated Makefile to compile new assembly files (`panic.o`, `trap_handler.o`).
+- **Shell:**
+  - `shell_loop()` now uses `print_prompt()`.
+  - Unknown command output now shows the exact command: `Unknown command 'xyz'`.
+  - Fixed backspace indentation and prompt restoration.
+- **Memory:** Added `#include <stdint.h>` and `panic.h` to `allocator.c`.
+
+### Fixed
+- **Prompt erasure:** Backspace can no longer delete the `ructix>` prompt.
+- **Makefile paths:** Fixed assembly file dependencies.
+- **Boot message:** Updated version string to `v0.1.0`.
+
+### Removed
+- **Old `boot.S`:** Deleted monolithic file (split into three logical files).
+
+## [v0.2.0] - 2026-08-27 - Major Security & Optimization Update
+
+### Added
+- **[!] Emergency stack** — 1 KB dedicated stack in BSS for fatal trap handling, prevents double faults.
+- **`fatal_trap_panic`** — assembly wrapper that routes severe exceptions onto the emergency stack and calls C handler.
+- **`unhandled_trap_c`** — C handler for fatal traps with register decoding and panic.
+- **`print_hex(uint64_t val)`** — print 64-bit values in hexadecimal format (great for debugging).
+- **Safe string functions** — `strnlen()` and `strncmp()` with length limits.
+- **DEBUG build mode** — optional `make DEBUG=1` with fault injection commands (`panic 1`, `panic 2`, `panic 3`).
+- **Debug triggers**:
+  - `panic 1` — illegal instruction (`unimp`)
+  - `panic 2` — load access fault (read from `0x0`)
+  - `panic 3` — stack overflow (recursive function)
+- **Automatic source discovery** — Makefile now collects all `.c` and `.S` files recursively.
+
+### Changed
+- **[!] Linker script restructured:** stacks and heap now inside `.bss` with explicit 16‑byte alignment.
+- **`mtvec` now set in C** via `csrw mtvec, %0` instead of assembly startup.
+- **Trap handler split:** timer interrupts handled normally, fatal traps jump to emergency stack.
+- **`volatile` qualifiers** added to shell state buffers to prevent compiler optimizations during UART interrupts.
+- **Makefile updated** — interactive prompt for DEBUG mode, cleaner pattern rules.
+
+### Fixed
+- **`strlen` prototype mismatch** — now returns `size_t`.
+- **Off-by-one bug** in shell command length check (`cmd_index < 255`, not `<=`).
+- **Global buffer conflicts** — `kernel_buf` and `alloc_buf` separated.
+- **Invalid pointer dereference** in shell (`*cmd` → `*str_cmd` with proper casting).
+- **UART output reliability** — added `uart_puts` for raw string output.
