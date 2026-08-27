@@ -1,2 +1,2 @@
-const char *rux_hello(void);
-const char *rux_nothing_to_execute(void);
+void rux_hello(void);
+void rux_nothing_to_execute(void);
