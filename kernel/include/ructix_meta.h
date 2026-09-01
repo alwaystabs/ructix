@@ -1,0 +1,37 @@
+#ifndef RUCTIX_META_H
+#define RUCTIX_META_H
+
+#ifndef RUCTIX_GIT_VERSION
+    #define RUCTIX_GIT_VERSION "unknown"
+#endif
+
+#define RUCTIX_VERSION_MAJOR 0
+#define RUCTIX_VERSION_MINOR 2
+#define RUCTIX_VERSION_PATCH 0
+
+#define RUCTIX_VERSION_STRING "v0.2.0"
+
+#define RUCTIX_FULL_VERSION RUCTIX_VERSION_STRING " (" RUCTIX_GIT_VERSION ")"
+
+#define RUCTIX_BUILD_DATE __DATE__
+#define RUCTIX_BUILD_TIME __TIME__
+
+#define RUCTIX_NAME "RUCTiX"
+#define RUCTIX_AUTHOR "alwaystabs"
+#define RUCTIX_YEAR "2026"
+
+#ifdef DEBUG
+    #define RUCTIX_BUILD_TYPE "DEBUG"
+#else
+    #define RUCTIX_BUILD_TYPE "RELEASE"
+#endif
+
+#define RUCTIX_BOOT_STRING RUCTIX_NAME " " RUCTIX_VERSION_STRING \
+    " (" RUCTIX_BUILD_TYPE ") built by " RUCTIX_AUTHOR \
+    " on " RUCTIX_BUILD_DATE " at " RUCTIX_BUILD_TIME
+// ^^^^^^^ Boot log string
+
+#define RUCTIX_STATUS_STRING RUCTIX_NAME " " RUCTIX_VERSION_STRING \
+    " (" RUCTIX_BUILD_TYPE ")"
+
+#endif
