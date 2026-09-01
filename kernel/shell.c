@@ -1,9 +1,10 @@
 #include "include/shell.h"
-
+#include "include/ansi.h"
 #include "include/kstring.h"
 #include "include/panic.h"
 #include "include/uart.h"
 #include "secret/rux.h"
+#include "include/ructix_meta.h"
 
 extern volatile unsigned long long tick_count;
 int strcmp(const char *str1, const char *str2);
@@ -25,7 +26,6 @@ char print_prompt(void) {
 }
 
 void shell_loop(void) {
-  print("Ructix shell is UP. \n");
   prompt_len = print_prompt();
   while (1) {
     __asm__ volatile("wfi");
@@ -82,7 +82,7 @@ void shell_execute(volatile char *cmd) {
     return;
   }
   if (strnlen(str_cmd, 255) >= 255) {
-    print("Command too long (max 255 chars); ignoring\n");
+    print(ANSI_YELLOW ANSI_BOLD "[!] Command too long (max 255 chars); ignoring\n" ANSI_RESET);
     return;
   }
 
@@ -92,40 +92,74 @@ void shell_execute(volatile char *cmd) {
       return;
     }
   }
-  print("ructix: Unknown command ");
+  print(ANSI_YELLOW ANSI_BOLD "[!] ructix: Unknown command ");
   print("'");
   print((const char *)(str_cmd));
-  print("'\n");
-}
-
-void cmd_help(void) {
-  print("help - show this message\r\n");
-  print("status - show system status (ticks, memory)\r\n");
-  print("panic - trigger kernel panic\n");
-#ifdef DEBUG
-  print("panic 1 - unimp (RISC-V reserved illegal instruction)\r\n");
-  print("panic 2 - Load Access Fault\r\n");
-  print("panic 3 - Stack Overflow\r\n");
-#endif
+  print("'\n" ANSI_RESET);
 }
 
 void cmd_status(void) {
-  static char buf[32];
-  print("Ticks: ");
-  itoa(tick_count, buf);
-  print(buf);
-  print("\n");
+    static char buf[32];
+
+    print(ANSI_CYAN "═══════════════════════════════════════════════\n" ANSI_RESET);
+    print(ANSI_BOLD "  System Status\n" ANSI_RESET);
+    print(ANSI_CYAN "═══════════════════════════════════════════════\n" ANSI_RESET);
+
+    print("  " ANSI_GRAY "Version:" ANSI_RESET "  ");
+    print(RUCTIX_VERSION_STRING);
+    print("\n");
+
+    print("  " ANSI_GRAY "Build:" ANSI_RESET "   ");
+    print(RUCTIX_BUILD_TYPE);
+    print("\n");
+
+    print("  " ANSI_GRAY "Ticks:" ANSI_RESET "   ");
+    itoa(tick_count, buf);
+    print(buf);
+    print("\n");
+
+    print(ANSI_CYAN "═══════════════════════════════════════════════\n" ANSI_RESET);
+}
+
+void cmd_help(void) {
+    print(ANSI_CYAN "═══════════════════════════════════════════════════════════\n" ANSI_RESET);
+    print(ANSI_BOLD "  RUCTiX " ANSI_RESET);
+    print(RUCTIX_VERSION_STRING);
+    print(ANSI_BOLD " — Available Commands\n" ANSI_RESET);
+    print(ANSI_CYAN "═══════════════════════════════════════════════════════════\n" ANSI_RESET);
+
+    print(ANSI_GREEN "  help" ANSI_RESET);
+    print("    — Show this help message\n");
+
+    print(ANSI_GREEN "  status" ANSI_RESET);
+    print("  — Show system status (ticks, memory)\n");
+
+    print(ANSI_GREEN "  panic" ANSI_RESET);
+    print("   — Trigger a kernel panic\n");
+
+#ifdef DEBUG
+    print(ANSI_YELLOW "\n  Debug commands:\n" ANSI_RESET);
+    print(ANSI_GREEN "  panic 1" ANSI_RESET);
+    print("  — Illegal instruction\n");
+    print(ANSI_GREEN "  panic 2" ANSI_RESET);
+    print("  — Load access fault\n");
+    print(ANSI_GREEN "  panic 3" ANSI_RESET);
+    print("  — Stack overflow\n");
+#endif
+
+    print(ANSI_CYAN "═══════════════════════════════════════════════════════════\n" ANSI_RESET);
+    print(ANSI_GRAY "  Type a command and press Enter.\n" ANSI_RESET);
 }
 
 void cmd_panic(void) {
 #ifndef DEBUG
-char c;
-print("Confirm: kernel will halt due to user-triggered panic (y/N)\n");
-while ((c = uart_getchar()) == '\0') {
-
-}
-if (c == 'y') {
+    char c;
+    print(ANSI_YELLOW "Confirm: kernel will halt due to user-triggered panic (y/N)\n" ANSI_RESET);
+    while ((c = uart_getchar()) == '\0') {}
+    if (c == 'y') {
         panic("User-triggered panic");
+    } else {
+        print(ANSI_GRAY "Panic cancelled.\n" ANSI_RESET);
     }
 #endif
 }
