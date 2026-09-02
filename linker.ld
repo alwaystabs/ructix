@@ -36,7 +36,7 @@ SECTIONS
         /* Main stack */
         . = ALIGN(16);
         _stack_bottom = .;
-        . += 0x1000;
+        . += 0x1024;
         _stack_top = .;
         
         /* Emergency stack */
