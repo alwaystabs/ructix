@@ -67,12 +67,16 @@ void shell_execute(volatile char *cmd) {
 #ifdef DEBUG
   if (strncmp(str_cmd, "panic 1", 7) == 0) {
     debug_trigger_fault(1);
+    return;
   } else if (strncmp(str_cmd, "panic 2", 7) == 0) {
     debug_trigger_fault(2);
+    return;
   } else if (strncmp(str_cmd, "panic 3", 7) == 0) {
     debug_trigger_fault(3);
+    return;
   } else if (strncmp(str_cmd, "panic", 5) == 0) {
     debug_trigger_fault(0);
+    return;
   }
 #endif
   if (*str_cmd == '\0') {
@@ -92,6 +96,7 @@ void shell_execute(volatile char *cmd) {
       return;
     }
   }
+  
   print(ANSI_YELLOW ANSI_BOLD "[!] ructix: Unknown command ");
   print("'");
   print((const char *)(str_cmd));
