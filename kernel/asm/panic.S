@@ -28,6 +28,9 @@ panic:
 
     mv s0, a0
 
+    la a0, panic_msg_suffix
+    call uart_print_string
+    
     la a0, divider
     call uart_print_string
 
