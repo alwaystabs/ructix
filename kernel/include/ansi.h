@@ -46,7 +46,7 @@
 #define ANSI_BG_BRIGHT_CYAN    "\033[106m"
 #define ANSI_BG_BRIGHT_WHITE   "\033[107m"
 
-// Might be usable??
+// Might be usable. It is.
 #define ANSI_ERROR   ANSI_RED
 #define ANSI_WARN    ANSI_YELLOW
 #define ANSI_INFO    ANSI_CYAN
