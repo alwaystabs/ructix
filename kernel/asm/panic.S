@@ -13,11 +13,9 @@ emergency_label:
 emergency_reason:
     .asciz "Reason: "
 emergency_sp:
-    .asciz "SP: 0x"
+    .asciz "SP: "
 emergency_newline:
     .asciz "\n"
-panic_msg:
-    .asciz "Stack overflow!"
 hardcoded_msg:
     .asciz "STACK OVERFLOW DETECTED!"
 .section .text
@@ -30,7 +28,7 @@ panic:
 
     la a0, panic_msg_suffix
     call uart_print_string
-    
+
     la a0, divider
     call uart_print_string
 
@@ -58,7 +56,7 @@ halt:
 
 uart_print_string:
 
-    li t1, 0x10000000
+    li t1, 0x10000000 # !! hardcoded, change manually if something
 
 1:
     lb t0, 0(a0)
@@ -102,5 +100,5 @@ switch_to_emergency:
         addi t0, t0, -1
         bnez t0, 1b
 
-    la a0, hardcoded_msg
+    la a0, s1
     call panic
