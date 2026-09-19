@@ -100,5 +100,5 @@ switch_to_emergency:
         addi t0, t0, -1
         bnez t0, 1b
 
-    la a0, s1
+    mv a0, s1
     call panic
