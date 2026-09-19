@@ -5,9 +5,6 @@
 
 #ifdef DEBUG
 
-extern char _stack_bottom[];
-#define STACK_LIMIT_ADDR ((uintptr_t)_stack_bottom)
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winfinite-recursion"
 
@@ -53,8 +50,7 @@ void debug_trigger_fault(int test_id) {
         cause_stack_overflow(1);
         break;
     case 4:
-        print("[DEBUG] User-triggered panic...");
-        panic("");
+        panic("User-triggered panic (DEBUG)");
         break;
     default:
         print("Usage: panic <1|2|3|4>\r\n");
