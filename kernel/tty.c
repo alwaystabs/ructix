@@ -1,32 +1,33 @@
-#include "include/shell.h"
+#include "include/tty.h"
 #include "include/ansi.h"
 #include "include/kstring.h"
 #include "include/panic.h"
 #include "include/uart.h"
 #include "secret/rux.h"
 #include "include/ructix_meta.h"
+#include "include/memory.h"
+#include <stddef.h>
+#include <stdint.h>
 
-extern volatile unsigned long long tick_count;
-int strcmp(const char *str1, const char *str2);
-void debug_trigger_fault(int test_id);
-volatile char cmd_buf[256];
-volatile int cmd_index = 0;
-static int prompt_len = 0;
+extern volatile unsigned long long tick_count; // look in timer.h
+void debug_trigger_fault(int test_id); // look in debug.c
+char cmd_buf[256]; // main buffer for commands i/o
+int cmd_index = 0; // how many symbols are written now (by tty)
 
-void cmd_help(void);
-void cmd_status(void);
-void cmd_panic(void);
+void cmd_help(const char *args);
+void cmd_status(const char *args);
+void cmd_panic(const char *args);
+void cmd_67(const char *args);
+void cmd_kalloc(const char *args);
+void cmd_kfree(const char *args);
 
-char print_prompt(void) {
-  const char *prompt = "ructix> ";
-  int len = strlen(prompt);
+void print_prompt(void) {
   print("\033[K");
-  print(prompt);
-  return len;
+  print("ructix> ");
 }
 
-void shell_loop(void) {
-  prompt_len = print_prompt();
+void tty_loop(void) {
+  print_prompt();
   while (1) {
     __asm__ volatile("wfi");
     char c = uart_getchar();
@@ -35,12 +36,13 @@ void shell_loop(void) {
         uart_putchar('\r');
         uart_putchar('\n');
         cmd_buf[cmd_index] = '\0';
-        shell_execute(cmd_buf);
+        tty_execute(cmd_buf);
         cmd_index = 0;
         print_prompt();
       } else if (c == '\b' || c == 0x7f) { // '\b' and 0x7f = Backspace key
         if (cmd_index > 0) {
           cmd_index--;
+          cmd_buf[cmd_index] = '\0'; // defining the end of the buffer (string). either we don't know where to write symbols
           uart_putchar('\b');
           uart_putchar(' ');
           uart_putchar('\b');
@@ -50,7 +52,7 @@ void shell_loop(void) {
         cmd_index++;
         uart_putchar(c);
       } else {
-        uart_putchar(c);
+          // nothing - ignoring everything over 255 chars
       }
     }
   }
@@ -60,51 +62,69 @@ static const command_t commands[] = {
     {"help", cmd_help},
     {"status", cmd_status},
     {"panic", cmd_panic},
+    {"67", cmd_67},
+    {"kalloc", cmd_kalloc},
+    {"kfree", cmd_kfree},
 };
 
-void shell_execute(volatile char *cmd) {
+void tty_execute(volatile char *cmd) {
   const char *str_cmd = (const char *)cmd;
-#ifdef DEBUG
-  if (strncmp(str_cmd, "panic 1", 7) == 0) {
-    debug_trigger_fault(1);
-    return;
-  } else if (strncmp(str_cmd, "panic 2", 7) == 0) {
-    debug_trigger_fault(2);
-    return;
-  } else if (strncmp(str_cmd, "panic 3", 7) == 0) {
-    debug_trigger_fault(3);
-    return;
-  } else if (strncmp(str_cmd, "panic", 5) == 0) {
-    debug_trigger_fault(0);
-    return;
-  }
-#endif
+
   if (*str_cmd == '\0') {
     if ((tick_count % 100) < 3) {
-      rux_nothing_to_execute();
+      rux_nothing_to_execute(); // in rux.c :)
     }
     return;
   }
-  if (strnlen(str_cmd, 255) >= 255) {
+  if (strnlen(cmd_buf, 255) >= 255) { // 256th symbol is '\0'
     print(ANSI_YELLOW ANSI_BOLD "[!] Command too long (max 255 chars); ignoring\n" ANSI_RESET);
     return;
   }
 
-  for (int i = 0; i < (int)(sizeof(commands) / sizeof(commands[0])); i++) {
-    if (strcmp(str_cmd, commands[i].name) == 0) {
-      commands[i].func();
-      return;
-    }
+  const char *cmd_args = str_cmd;
+  while (*cmd_args != ' ' && *cmd_args != '\0') {
+      cmd_args++;
   }
-  
+
+  const char *args;
+  if (*cmd_args == ' ') {
+      *(char *)cmd_args = '\0';
+      args = cmd_args + 1;
+  } else {
+      args = NULL;
+  }
+
+  *(char *)cmd_args = '\0';
+
+  #ifdef DEBUG
+  print(ANSI_DEBUG"\nFunc: ");
+  print(str_cmd);
+  print("; Args: ");
+  if (args != NULL) {
+      print(args);
+  } else {
+      print("(none)");
+  }
+  print(ANSI_RESET);
+  print("\n");
+  #endif
+
+  for (int i = 0; i < (int)(sizeof(commands) / sizeof(commands[0])); i++) {
+      if (strcmp(str_cmd, commands[i].name) == 0) {
+          commands[i].func(args);
+          return;
+      }
+  }
+
   print(ANSI_YELLOW ANSI_BOLD "[!] ructix: Unknown command ");
   print("'");
   print((const char *)(str_cmd));
   print("'\n" ANSI_RESET);
 }
 
-void cmd_status(void) {
-    static char buf[32];
+void cmd_status(const char *args) {
+    (void)args;
+    static char buf[32]; // for printing ticks
 
     print(ANSI_CYAN "═══════════════════════════════════════════════\n" ANSI_RESET);
     print(ANSI_BOLD "  System Status\n" ANSI_RESET);
@@ -126,7 +146,8 @@ void cmd_status(void) {
     print(ANSI_CYAN "═══════════════════════════════════════════════\n" ANSI_RESET);
 }
 
-void cmd_help(void) {
+void cmd_help(const char *args) {
+    (void)args;
     print(ANSI_CYAN "═══════════════════════════════════════════════════════════\n" ANSI_RESET);
     print(ANSI_BOLD "  RUCTiX " ANSI_RESET);
     print(RUCTIX_VERSION_STRING);
@@ -156,10 +177,21 @@ void cmd_help(void) {
     print(ANSI_GRAY "  Type a command and press Enter.\n" ANSI_RESET);
 }
 
-void cmd_panic(void) {
-#ifndef DEBUG
+void cmd_panic(const char *args) {
+    (void)args;
+#ifdef DEBUG
+    if (args == NULL) {
+        debug_trigger_fault(0);   // usage
+        return;
+    }
+    if (strcmp(args, "1") == 0) { debug_trigger_fault(1); return; }
+    if (strcmp(args, "2") == 0) { debug_trigger_fault(2); return; }
+    if (strcmp(args, "3") == 0) { debug_trigger_fault(3); return; }
+    if (strcmp(args, "4") == 0) { debug_trigger_fault(4); return; }
+    debug_trigger_fault(0);   // if unknown - showing usage
+#else
     char c;
-    print(ANSI_YELLOW "Confirm: kernel will halt due to user-triggered panic (y/N)\n" ANSI_RESET);
+    print(ANSI_YELLOW "Confirm: kernel will halt due to user-triggered panic (y/N) " ANSI_RESET);
     while ((c = uart_getchar()) == '\0') {}
     if (c == 'y') {
         panic("User-triggered panic");
@@ -167,4 +199,19 @@ void cmd_panic(void) {
         print(ANSI_GRAY "Panic cancelled.\n" ANSI_RESET);
     }
 #endif
+}
+
+void cmd_67(const char *args) {
+  (void)args;
+  print(ANSI_WARN ANSI_BOLD "How funny.\n" ANSI_RESET);
+}
+void cmd_kalloc(const char *args) {
+    (void)args;
+    // TODO: decimal to string
+    print(ANSI_WARN"[!] In development \n" ANSI_RESET);
+}
+void cmd_kfree(const char *args) {
+    (void)args;
+    // TODO: implement kfree when allocator API is stable
+    print(ANSI_WARN"[!] In development \n" ANSI_RESET);
 }
