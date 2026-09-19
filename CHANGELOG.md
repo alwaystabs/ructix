@@ -159,3 +159,45 @@
 - **Global buffer conflicts** — `kernel_buf` and `alloc_buf` separated.
 - **Invalid pointer dereference** in shell (`*cmd` → `*str_cmd` with proper casting).
 - **UART output reliability** — added `uart_puts` for raw string output.
+
+## [v0.3.0] - 2026-09-08 — The Heap & Fault Injection Update
+
+### Added
+- **[!] Full block-based memory allocator** — `kmalloc()` and `kfree()` rewritten with free list, block headers, and memory reuse (replaces bump allocator).
+- **[!] `test_allocator()`** — 6 test cases: basic allocation, free/reuse, multiple small allocs, large alloc, zero-size, stress test.
+- **[!] `debug.c`** — dedicated debug module with fault injection (`panic 1-4`) and recursive stack overflow detection.
+- **[!] `switch_to_emergency()`** — assembly routine that switches to emergency stack, prints diagnostics (SP, reason), and calls `panic()`.
+- **[!] `ansi.h`** — full ANSI color macro set (styles, 8 fg, 8 bright fg, 8 bg, 8 bright bg, semantic aliases).
+- **[!] `ructix_meta.h`** — system metadata: version (major/minor/patch), build date/time, build type (DEBUG/RELEASE), Git commit, author, year.
+- **`__stack_chk_guard` / `__stack_chk_fail()`** — stack canary initialized from `rdtime`, panics on corruption.
+- **`tools/analyze/analyze.py`** — Python code analyzer: line counting (code/comments/blanks), growth tracking, JSON history.
+- **`Makefile`: `GIT_VERSION`** — automatically embeds short Git hash via `git rev-parse`.
+- **`.gitignore`** — ignores `*.tar.gz`, `*.json`.
+
+### Changed
+- **[!] `shell.c` → `tty.c`, `shell.h` → `tty.h`** — `shell_loop()` → `tty_loop()`, `shell_execute()` → `tty_execute()`.
+- **[!] `command_t`** — function pointer now takes `const char *args` (was `void`), enabling argument passing.
+- **[!] `kmalloc()`** — returns `NULL` for size 0, bounds check via `_heap_end - heap_ptr`, reuses free blocks, prints `[kmalloc]` debug logs.
+- **[!] `kfree()`** — adds block to free list, detects double free via `used` flag.
+- **`panic.S`** — colored output, divider, `switch_to_emergency` with emergency stack diagnostics.
+- **`unhandled_trap.c`** — masks interrupt bit before `switch`, recognizes all standard RISC-V exception codes 0–15.
+- **`kstring.c`** — `strcmp` uses `unsigned char` comparison; `print_hex` writes directly to UART (no intermediate buffer).
+- **`init.c`** — removed tick test; `init_check()` only runs `test_allocator()` under `DEBUG`; `kmain()` sets up timer and stack guard, then calls `tty_loop()`.
+- **`timer.h`** — `TICKS_PER_SEC` changed 60 → 100; define order fixed (`TIMER_FREQ` before `TIMER_INTERVAL`); added `#include <stdint.h>`.
+- **`linker.ld`** — main stack size `0x1000` → `0x1024`.
+- **`Makefile`** — `DEBUG=1` now adds `-g -O0 -fno-omit-frame-pointer`; release adds `-O2`; `code` target now packs `linker.ld`, `Makefile`, `tools/`, `README.md`, `CHANGELOG.md`.
+- **`memory.h`** — added `block_header_t` struct and `test_allocator()` prototype.
+- **`panic.h`** — added `switch_to_emergency()` prototype.
+
+### Fixed
+- `kmalloc(0)` now returns `NULL` (was allocating 8 bytes).
+- Double free detected and rejected (was corrupting free list).
+- `panic 2` now displays "Load Access Fault" instead of "Unknown Exception".
+- `panic 4` reachable from shell (was falling through).
+- Double `0x` prefix in `SP:` output fixed.
+- `strcmp` returns correct result for bytes > 127 (was signed).
+
+### Removed
+- **`shell.c`, `shell.h`** — replaced by `tty.c`, `tty.h`.
+- **Old debug functions from `init.c`** — moved to `debug.c`.
+- **Tick test loop in `init_check()`** — was not testing real timer interrupts.
