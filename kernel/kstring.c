@@ -53,7 +53,7 @@ int strcmp(const char *str1, const char *str2) {
     str1++;
     str2++;
   }
-  return *str1 - *str2;
+  return *(unsigned char *)str1 - *(unsigned char *)str2;
 }
 
 void print_hex(uint64_t val) {
