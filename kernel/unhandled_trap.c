@@ -21,7 +21,8 @@ void unhandled_trap_c(uint64_t cause, uint64_t epc) {
     print("\033[4;68H║");
 
     print("\033[5;1H║  CAUSE: ");
-    switch (cause) {
+    uint64_t code = cause & 0x7FFFFFFFFFFFFFFF;
+    switch (code) {
     case 0:  print("Instruction Address Misaligned"); break;
     case 1:  print("Instruction Access Fault");       break;
     case 2:  print("Illegal Instruction");            break;
