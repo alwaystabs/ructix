@@ -10,13 +10,12 @@ static char *heap_ptr;
 char alloc_buf[32];
 
 static block_header_t *free_list = NULL;
-static block_header_t *heap_start = NULL;
 
 void kmalloc_init(void) {
     heap_ptr = (char *)(((uintptr_t)_heap_start + 7) & ~7);
 }
 
-void *kmalloc(size_t size) {
+void *kmalloc(size_t size) { // brainfuck
     if (size == 0) return NULL;
 
     size_t total_size = size + sizeof(block_header_t);
@@ -24,6 +23,11 @@ void *kmalloc(size_t size) {
 
     block_header_t *prev = NULL;
     block_header_t *current = free_list;
+
+    if (total_size > (size_t)(_heap_end - heap_ptr)) {
+        print (ANSI_RED ANSI_BOLD "[!!!] Tried to allocate a block exceeding heap limit, ignoring\n" ANSI_RESET);
+        return 0;
+    }
 
     while (current) {
         if (current->used == 0 && current->size >= total_size) {
@@ -74,6 +78,11 @@ void kfree(void *ptr) {
 
     block_header_t *block = (block_header_t*)((char*)ptr - sizeof(block_header_t));
 
+    if (block->used == 0) {
+        print("[!] Double free detected\n");
+        return;
+    }
+
     block->used = 0;
 
     block->next = free_list;
@@ -90,8 +99,6 @@ void kfree(void *ptr) {
 }
 
 void test_allocator(void) { // Yes, this is AI
-
-    kmalloc_init();
     print(ANSI_DEBUG"[INIT] Allocator initialized.\n");
     print("[INFO] Heap: " ANSI_RESET);
     print_hex((uintptr_t)_heap_start);
