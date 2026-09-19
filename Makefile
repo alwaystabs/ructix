@@ -7,6 +7,9 @@ DEBUG ?= 0
 
 BUILD_GOALS := all elf test
 
+GIT_VERSION := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+CFLAGS += -DRUCTIX_GIT_VERSION=\"$(GIT_VERSION)\"
+
 ifneq ($(filter $(MAKECMDGOALS),$(BUILD_GOALS))$(if $(MAKECMDGOALS),,default),)
     ifeq ($(origin DEBUG), command line)
         $(info ---> [BUILD MODE] $(if $(filter 1,$(DEBUG)),Debug,Release) (forced))
@@ -31,7 +34,9 @@ ASFLAGS  = $(CFLAGS) -x assembler-with-cpp
 LDFLAGS  = -T linker.ld -no-pie
 
 ifeq ($(DEBUG), 1)
-    CFLAGS += -DDEBUG
+    CFLAGS += -DDEBUG -g -O0 -fno-omit-frame-pointer
+else
+    CFLAGS += -O2
 endif
 
 BUILD_DIR  = build
@@ -83,6 +88,6 @@ archive:
 	tar -czf ructix-autorel-$$(date +%d-%m-%Y).tar.gz $(BUILD_DIR)
 
 code:
-	tar -czf ructix-source-$$(date +%d-%m-%Y).tar.gz $(KERNEL_DIR)
+	tar -czf ructix-source-$$(date +%d-%m-%Y).tar.gz $(KERNEL_DIR) linker.ld Makefile tools/ README.md CHANGELOG.md
 
-.PHONY: all elf run clean test archive
+.PHONY: all elf run clean test archive code
