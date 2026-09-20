@@ -5,7 +5,6 @@
 #include "include/uart.h"
 #include "secret/rux.h"
 #include "include/ructix_meta.h"
-#include "include/memory.h"
 #include <stddef.h>
 #include <stdint.h>
 

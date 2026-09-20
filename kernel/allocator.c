@@ -1,5 +1,5 @@
 #include "include/memory.h"
-#include "include/panic.h"
+#include "include/panic.h"   // for heap corruption checks (magic, bounds)
 #include "include/ansi.h"
 #include <stdint.h>
 #include <stddef.h>
@@ -15,7 +15,7 @@ void kmalloc_init(void) {
     heap_ptr = (char *)(((uintptr_t)_heap_start + 7) & ~7);
 }
 
-void *kmalloc(size_t size) { // brainfuck
+void *kmalloc(size_t size) { // brainfuck. nvm, i am starting to understand it
     if (size == 0) return NULL;
 
     size_t total_size = size + sizeof(block_header_t);

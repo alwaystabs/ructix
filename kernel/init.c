@@ -1,5 +1,4 @@
 #include "include/timer.h"
-#include "include/kstring.h"
 #include "include/memory.h"
 #include "include/tty.h"
 #include "include/uart.h"
@@ -40,7 +39,7 @@ void kmain(void) {
     print("║          RUCTIX BOOT LOG           ║\n");
     print("╚════════════════════════════════════╝\n" ANSI_RESET);
     print(ANSI_GRAY "built by alwaystabs in 2026.\n" ANSI_RESET);
-    print(ANSI_GREEN "Ructix v0.3.0!\n" ANSI_RESET);
+    print(ANSI_GREEN "RUCTiX " RUCTIX_VERSION_STRING "! \n" ANSI_RESET);
     kmalloc_init();
     init_check();
     tty_loop();
