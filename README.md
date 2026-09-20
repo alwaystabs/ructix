@@ -25,6 +25,16 @@ long way from "print a character over UART" to a block-based allocator,
 fault injection, and an emergency stack — but it is still a learning
 project, not an operating system you would run in production.
 
+## Screenshots 
+
+![Example of boot log](docs/screenshots/example_of_boot_log.png)
+
+![Example of kernel trap](docs/screenshots/example_of_kernel_trap.png)
+
+![Example of basic TTY usage](docs/screenshots/example_of_tty_usage.png)
+
+![Example of DEBUG TTY usage](docs/screenshots/example_of_debug_tty_usage.png)
+
 ---
 
 ## Disclaimer
