@@ -33,7 +33,7 @@ project, not an operating system you would run in production.
 
 ![Example of basic TTY usage](docs/screenshots/example_of_tty_usage.png)
 
-![Example of DEBUG TTY usage](docs/screenshots/example_of_debug_tty_usage.png)
+![Example of DEBUG TTY usage](docs/screenshots/example_of_debug_tty.png)
 
 ---
 
