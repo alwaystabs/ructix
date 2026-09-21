@@ -3,6 +3,10 @@
 **A minimal RISC-V kernel built from scratch.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/alwaystabs/ructix/pulls)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/alwaystabs/ructix/actions)
+[![Language: C](https://img.shields.io/badge/language-C-blue)](https://github.com/alwaystabs/ructix)
+[![Platform: RISC-V](https://img.shields.io/badge/platform-RISC--V-purple)](https://github.com/alwaystabs/ructix)
 
 > ⚠️ **Educational project.** Not production-ready. See [Disclaimer](#disclaimer).
 
