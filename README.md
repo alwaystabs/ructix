@@ -276,6 +276,10 @@ python3 tools/analyze/analyze.py /path/to/ructix
 
 Statistics are saved to `tools/analyze/results/.code_stats.json`.
 
+## Last Code Review
+   Files:      23
+   Lines:     1311
+
 ---
 
 ## Contributing
