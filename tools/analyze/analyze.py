@@ -13,7 +13,7 @@ import hashlib
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 
 class RuctixAnalyzer:
@@ -44,14 +44,19 @@ class RuctixAnalyzer:
             "total_code": 0,
             "total_comments": 0,
             "total_blanks": 0,
-            "by_type": defaultdict(lambda: {"files": 0, "lines": 0, "code": 0, "comments": 0, "blanks": 0}),
+            "by_type": defaultdict(
+                lambda: {"files": 0, "lines": 0, "code": 0, "comments": 0, "blanks": 0}
+            ),
             "by_dir": defaultdict(lambda: {"files": 0, "lines": 0}),
             "file_details": [],
             "hash": None,
         }
 
     def should_analyze(self, file_path: Path) -> bool:
-        return file_path.suffix in self.target_extensions or file_path.name in self.target_files
+        return (
+            file_path.suffix in self.target_extensions
+            or file_path.name in self.target_files
+        )
 
     def get_file_type(self, file_path: Path) -> str:
         if file_path.suffix in self.target_extensions:
@@ -77,31 +82,48 @@ class RuctixAnalyzer:
             stripped = line.strip()
 
             if not stripped:
-                blanks += 1
+                # Пустые строки внутри блочного комментария — это комментарии
+                if in_multiline:
+                    comments += 1
+                else:
+                    blanks += 1
                 continue
 
             is_comment = False
 
             if ext == ".S":  # Assembly
-                if stripped.startswith(";") or stripped.startswith("#"):
+                if in_multiline:
                     is_comment = True
-                elif in_multiline and "*/" in stripped:
-                    in_multiline = False
+                    if "*/" in stripped:
+                        in_multiline = False
+                elif stripped.startswith("/*"):
+                    is_comment = True
+                    if "*/" not in stripped:
+                        in_multiline = True
+                elif stripped.startswith(";") or stripped.startswith("#"):
                     is_comment = True
 
             elif ext in (".c", ".h"):  # C / C++
-                if stripped.startswith("//"):
-                    is_comment = True
-                elif stripped.startswith("/*") or in_multiline:
+                if in_multiline:
                     is_comment = True
                     if "*/" in stripped:
                         in_multiline = False
+                elif stripped.startswith("/*"):
+                    is_comment = True
+                    if "*/" not in stripped:
+                        in_multiline = True
+                elif stripped.startswith("//"):
+                    is_comment = True
 
             elif ext == ".ld":  # Linker script
-                if stripped.startswith("/*") or in_multiline:
+                if in_multiline:
                     is_comment = True
                     if "*/" in stripped:
                         in_multiline = False
+                elif stripped.startswith("/*"):
+                    is_comment = True
+                    if "*/" not in stripped:
+                        in_multiline = True
                 elif stripped.startswith("//"):
                     is_comment = True
 
@@ -134,14 +156,16 @@ class RuctixAnalyzer:
             self.results["total_comments"] += comments
             self.results["total_blanks"] += blanks
 
-            self.results["file_details"].append({
-                "path": str(rel_path),
-                "type": ftype,
-                "total": total,
-                "code": code,
-                "comments": comments,
-                "blanks": blanks,
-            })
+            self.results["file_details"].append(
+                {
+                    "path": str(rel_path),
+                    "type": ftype,
+                    "total": total,
+                    "code": code,
+                    "comments": comments,
+                    "blanks": blanks,
+                }
+            )
 
             self.results["by_type"][ftype]["files"] += 1
             self.results["by_type"][ftype]["lines"] += total
@@ -166,6 +190,11 @@ class RuctixAnalyzer:
                 return None
         return None
 
+    @staticmethod
+    def _pct(delta: int, base: int) -> float:
+        """Безопасный процент: 0 если базы нет."""
+        return (delta / base * 100) if base else 0.0
+
     def get_growth(self, prev: Dict) -> Dict:
         growth = {"files": 0, "lines": 0, "code": 0}
         if prev:
@@ -182,22 +211,44 @@ class RuctixAnalyzer:
         prev = self.load_previous()
         growth = self.get_growth(prev)
 
+        total_lines = self.results["total_lines"] or 1  # защита от деления на 0
+
         print("\n" + "=" * 70)
-        print(f"RUCTIX KERNEL ANALYSIS - {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        print(
+            f"RUCTIX KERNEL ANALYSIS - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        )
         print("=" * 70)
 
         print("\n📊 Main Statistics:")
         print(f"   Files:    {self.results['total_files']:4d}")
         print(f"   Lines:    {self.results['total_lines']:5d}")
-        print(f"   Code:     {self.results['total_code']:5d}  ({self.results['total_code'] / self.results['total_lines'] * 100:.1f}%)")
-        print(f"   Comments: {self.results['total_comments']:4d}  ({self.results['total_comments'] / self.results['total_lines'] * 100:.1f}%)")
-        print(f"   Blanks:   {self.results['total_blanks']:4d}  ({self.results['total_blanks'] / self.results['total_lines'] * 100:.1f}%)")
+        print(
+            f"   Code:     {self.results['total_code']:5d}  "
+            f"({self.results['total_code'] / total_lines * 100:.1f}%)"
+        )
+        print(
+            f"   Comments: {self.results['total_comments']:4d}  "
+            f"({self.results['total_comments'] / total_lines * 100:.1f}%)"
+        )
+        print(
+            f"   Blanks:   {self.results['total_blanks']:4d}  "
+            f"({self.results['total_blanks'] / total_lines * 100:.1f}%)"
+        )
 
         if prev:
             print("\n📈 Project Growth:")
-            print(f"   Files:    {growth['files']:+d}  ({growth['files'] / prev.get('total_files', 1) * 100:+.1f}%)")
-            print(f"   Lines:    {growth['lines']:+d}  ({growth['lines'] / prev.get('total_lines', 1) * 100:+.1f}%)")
-            print(f"   Code:     {growth['code']:+d}  ({growth['code'] / prev.get('total_code', 1) * 100:+.1f}%)")
+            print(
+                f"   Files:    {growth['files']:+d}  "
+                f"({self._pct(growth['files'], prev.get('total_files', 0)):+.1f}%)"
+            )
+            print(
+                f"   Lines:    {growth['lines']:+d}  "
+                f"({self._pct(growth['lines'], prev.get('total_lines', 0)):+.1f}%)"
+            )
+            print(
+                f"   Code:     {growth['code']:+d}  "
+                f"({self._pct(growth['code'], prev.get('total_code', 0)):+.1f}%)"
+            )
             print(f"   Previous: {prev.get('timestamp', 'N/A')[:16]}")
         else:
             print("\n📈 GROWTH: First run — no previous data")
@@ -205,20 +256,28 @@ class RuctixAnalyzer:
         print("\n📂 BY FILE TYPE:")
         print(f"   {'Type':<15} {'Files':>6} {'Lines':>8} {'Code':>8}")
         print("   " + "-" * 40)
-        for ftype, stats in sorted(self.results["by_type"].items(), key=lambda x: x[1]["lines"], reverse=True):
-            print(f"   {ftype:<15} {stats['files']:>6} {stats['lines']:>8} {stats['code']:>8}")
+        for ftype, stats in sorted(
+            self.results["by_type"].items(), key=lambda x: x[1]["lines"], reverse=True
+        ):
+            print(
+                f"   {ftype:<15} {stats['files']:>6} {stats['lines']:>8} {stats['code']:>8}"
+            )
 
         print("\n📁 TOP DIRECTORIES:")
         print(f"   {'Directory':<20} {'Files':>8} {'Lines':>8}")
         print("   " + "-" * 38)
-        for dir_name, stats in sorted(self.results["by_dir"].items(), key=lambda x: x[1]["lines"], reverse=True)[:5]:
+        for dir_name, stats in sorted(
+            self.results["by_dir"].items(), key=lambda x: x[1]["lines"], reverse=True
+        )[:5]:
             display = dir_name if dir_name != "root" else "/"
             print(f"   {display:<20} {stats['files']:>8} {stats['lines']:>8}")
 
         print("\n🏆 LARGEST FILES:")
         print(f"   {'File':<35} {'Lines':>8} {'Code':>8}")
         print("   " + "-" * 52)
-        for f in sorted(self.results["file_details"], key=lambda x: x["total"], reverse=True)[:5]:
+        for f in sorted(
+            self.results["file_details"], key=lambda x: x["total"], reverse=True
+        )[:5]:
             name = f["path"]
             if len(name) > 33:
                 name = name[:30] + "..."
