@@ -11,7 +11,8 @@
 - GitHub release with `kernel.elf` and `kernel.bin` files.
 
 ### Fixed
-- UART output reliability by adding a small delay between characters.
+
+- Main stack is 4096 bytes again (`0x1000`); `0x1024` (4132) was unintentional (#31).- UART output reliability by adding a small delay between characters.
 - `panic()` now correctly displays the provided error message from C.
 
 ### The story has begun.
@@ -184,7 +185,7 @@
 - **`kstring.c`** — `strcmp` uses `unsigned char` comparison; `print_hex` writes directly to UART (no intermediate buffer).
 - **`init.c`** — removed tick test; `init_check()` only runs `test_allocator()` under `DEBUG`; `kmain()` sets up timer and stack guard, then calls `tty_loop()`.
 - **`timer.h`** — `TICKS_PER_SEC` changed 60 → 100; define order fixed (`TIMER_FREQ` before `TIMER_INTERVAL`); added `#include <stdint.h>`.
-- **`linker.ld`** — main stack size `0x1000` → `0x1024`.
+- **`linker.ld`** — main stack size set to `0x1000` (4096 bytes; `0x1024` was a hex/decimal mix-up).
 - **`Makefile`** — `DEBUG=1` now adds `-g -O0 -fno-omit-frame-pointer`; release adds `-O2`; `code` target now packs `linker.ld`, `Makefile`, `tools/`, `README.md`, `CHANGELOG.md`.
 - **`memory.h`** — added `block_header_t` struct and `test_allocator()` prototype.
 - **`panic.h`** — added `switch_to_emergency()` prototype.
