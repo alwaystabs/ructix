@@ -1,3 +1,7 @@
+#⚠️ The project is temporarily PAUSED.
+
+*just currently focused on my school exams, feel free to fork and PR!*
+
 # RUCTiX
 
 **A minimal RISC-V kernel built from scratch.**
