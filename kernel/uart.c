@@ -1,4 +1,4 @@
-#define UART_BASE 0x10000000
+#include "include/uart.h"
 
 void uart_putchar(const char c) {
   volatile char *uart = (char *)UART_BASE;
