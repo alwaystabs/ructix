@@ -1,4 +1,4 @@
-#⚠️ The project is temporarily PAUSED.
+# ⚠️ The project is temporarily PAUSED.
 
 *just currently focused on my school exams, feel free to fork and PR!*
 
